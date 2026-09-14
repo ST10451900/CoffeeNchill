@@ -11,12 +11,14 @@ namespace CoffeeNchill.Functions
     public class CreateMenuItem
     {
         private readonly ILogger _logger;
-        private const string ConnectionString = "UseDevelopmentStorage=true";
+        private readonly string _connectionString;
         private const string TableName = "MenuItems";
 
         public CreateMenuItem(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<CreateMenuItem>();
+            _connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage")
+                ?? throw new InvalidOperationException("AzureWebJobsStorage is not configured.");
         }
 
         [Function("CreateMenuItem")]
@@ -42,7 +44,7 @@ namespace CoffeeNchill.Functions
             input.RowKey = Guid.NewGuid().ToString();
 
             // Ensure the table exists, then add the entity
-            var tableClient = new TableClient(ConnectionString, TableName);
+            var tableClient = new TableClient(_connectionString, TableName);
             await tableClient.CreateIfNotExistsAsync();
             await tableClient.AddEntityAsync(input);
 

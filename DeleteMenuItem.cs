@@ -9,12 +9,15 @@ namespace CoffeeNchill
     public class DeleteMenuItem
     {
         private readonly ILogger _logger;
-        private const string ConnectionString = "UseDevelopmentStorage=true";
+        private readonly string _connectionString;
         private const string TableName = "MenuItems";
 
         public DeleteMenuItem(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<DeleteMenuItem>();
+            _connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage")
+    ?? throw new InvalidOperationException("AzureWebJobsStorage is not configured.");
+
         }
 
         [Function("DeleteMenuItem")]
@@ -22,7 +25,7 @@ namespace CoffeeNchill
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "menu/{category}/{id}")] HttpRequestData req,
             string category, string id)
         {
-            var tableClient = new TableClient(ConnectionString, TableName);
+            var tableClient = new TableClient(_connectionString, TableName);
             await tableClient.CreateIfNotExistsAsync();
 
             try

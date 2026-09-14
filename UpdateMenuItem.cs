@@ -11,12 +11,15 @@ namespace CoffeeNchill
     public class UpdateMenuItem
     {
         private readonly ILogger _logger;
-        private const string ConnectionString = "UseDevelopmentStorage=true";
+        private readonly string _connectionString;
         private const string TableName = "MenuItems";
 
         public UpdateMenuItem(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<UpdateMenuItem>();
+            _connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage")
+     ?? throw new InvalidOperationException("AzureWebJobsStorage is not configured.");
+
         }
 
         [Function("UpdateMenuItem")]
@@ -34,7 +37,7 @@ namespace CoffeeNchill
                 return badResponse;
             }
 
-            var tableClient = new TableClient(ConnectionString, TableName);
+            var tableClient = new TableClient(_connectionString, TableName);
             await tableClient.CreateIfNotExistsAsync();
 
             try

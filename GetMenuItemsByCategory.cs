@@ -10,12 +10,14 @@ namespace CoffeeNchill
     public class GetMenuItemsByCategory
     {
         private readonly ILogger _logger;
-        private const string ConnectionString = "UseDevelopmentStorage=true";
+        private readonly string _connectionString;
         private const string TableName = "MenuItems";
 
         public GetMenuItemsByCategory(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<GetMenuItemsByCategory>();
+            _connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage")
+                ?? throw new InvalidOperationException("AzureWebJobsStorage is not configured.");
         }
 
         [Function("GetMenuItemsByCategory")]
@@ -23,7 +25,7 @@ namespace CoffeeNchill
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "menu/category/{category}")] HttpRequestData req,
             string category)
         {
-            var tableClient = new TableClient(ConnectionString, TableName);
+            var tableClient = new TableClient(_connectionString, TableName);
             await tableClient.CreateIfNotExistsAsync();
 
             var items = new List<MenuItem>();
