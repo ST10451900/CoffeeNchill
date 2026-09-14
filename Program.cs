@@ -7,13 +7,14 @@ var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
 
-var storageConnectionString =
-    Environment.GetEnvironmentVariable("AzureWebJobsStorage")
+// Connection to the real Azure Storage account for staff documents
+var fileConnectionString =
+    Environment.GetEnvironmentVariable("AzureFilesConnection")
     ?? throw new InvalidOperationException(
-        "AzureWebJobsStorage is not configured.");
+        "AzureFilesConnection is not configured.");
 
 builder.Services.AddSingleton(
-    new ShareServiceClient(storageConnectionString)
+    new ShareServiceClient(fileConnectionString)
 );
 
 builder.Build().Run();
