@@ -15,14 +15,12 @@ builder.Services
     .ConfigureFunctionsApplicationInsights();
 
 // Register Azure File Storage client for dependency injection
-string? storageConnectionString =
-    Environment.GetEnvironmentVariable("AzureStorageConnection");
+string storageConnectionString =
+    Environment.GetEnvironmentVariable("AzureWebJobsStorage")
+    ?? throw new InvalidOperationException(
+        "AzureWebJobsStorage is not configured.");
 
-if (!string.IsNullOrWhiteSpace(storageConnectionString))
-{
-    builder.Services.AddSingleton(
-        new ShareServiceClient(storageConnectionString));
-}
-
+builder.Services.AddSingleton(
+    new ShareServiceClient(storageConnectionString));
 
 builder.Build().Run();
